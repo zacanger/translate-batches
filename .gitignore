@@ -1,0 +1,17 @@
+*.log
+*.py[cod]
+*.pyc
+*.swp
+*~
+.DS_Store
+._*
+.env
+.idea
+.venv
+.virtualenv
+.vs/
+.vscode
+/tags
+__pycache__/
+key.json
+venv
