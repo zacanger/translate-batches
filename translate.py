@@ -79,7 +79,7 @@ def chunk_file(text):
 
 
 def write_translated_file(text, path):
-    with open(path + SERVICE_TO_USE + ".md", "w") as dst:
+    with open(path + "-" + SERVICE_TO_USE, "w") as dst:
         dst.write(text)
         dst.close()
         return
