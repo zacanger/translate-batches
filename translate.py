@@ -7,6 +7,15 @@ import sys
 SERVICE_TO_USE = "amazon"
 # zh-TW == traditional chinese, see the docs for language codes
 LANGUAGE_FROM = "zh-TW"
+# en-US, en, etc., see the docs for language codes
+LANGUAGE_TO = "en"
+
+# fill in from google cloud console
+GOOGLE_PROJECT_ID = "translation-301721"
+GOOGLE_PROJECT_LOCATION = "global"
+
+# fill in from your aws account
+AMAZON_REGION = "us-east-1"
 
 dir_to_translate = sys.argv[1]
 files_to_translate = os.listdir(dir_to_translate)
@@ -20,18 +29,17 @@ def amazon_translate_text(text):
     # so add in a bunch of retry attempts
     config = Config(retries=dict(max_attempts=20))
 
-    # add your settings
-    region = "us-east-1"
-
     translate = boto3.client(
         service_name="translate",
-        region_name=region,
+        region_name=AMAZON_REGION,
         use_ssl=True,
         config=config,
     )
 
     result = translate.translate_text(
-        Text=text, SourceLanguageCode=LANGUAGE_FROM, TargetLanguageCode="en"
+        Text=text,
+        SourceLanguageCode=LANGUAGE_FROM,
+        TargetLanguageCode=LANGUAGE_TO,
     )
 
     return result.get("TranslatedText")
@@ -40,19 +48,17 @@ def amazon_translate_text(text):
 def google_translate_text(text):
     from google.cloud import translate
 
-    # fill in project id from google cloud console
-    project_id = "translation-301721"
-    location = "global"
-
     client = translate.TranslationServiceClient()
-    parent = f"projects/{project_id}/locations/{location}"
+    parent = (
+        f"projects/{GOOGLE_PROJECT_ID}/locations/{GOOGLE_PROJECT_LOCATION}"
+    )
     response = client.translate_text(
         request={
             "parent": parent,
             "contents": [text],
             "mime_type": "text/plain",
             "source_language_code": LANGUAGE_FROM,
-            "target_language_code": "en-US",
+            "target_language_code": LANGUAGE_TO,
         }
     )
 
@@ -86,7 +92,6 @@ def translate_file(file_name):
         splits = chunk_file(source)
         tr = []
         for s in splits:
-            # TODO: amazon
             if SERVICE_TO_USE == "google":
                 tr.append(google_translate_text(s))
             elif SERVICE_TO_USE == "amazon":
